@@ -18,20 +18,26 @@ int main()
   const int MAXDENOM = 13;
   string Dividend;
   string Divisor;
-  char DividendArray[MAXNUM];
-  char DivisorArray[MAXDENOM];
+  char DividendArray1[MAXNUM];
+  char DivisorArray1[MAXDENOM];
+  char DividendArray2[MAXNUM];
+  char DivisorArray2[MAXDENOM];
+
   for(int i = 0; i < 20; i++)
   {
     cin >> Dividend;
-    DividendArray[0] = Dividend[0];
+    DividendArray1[0] = Dividend[0];
+    DividendArray2[0] = Dividend[0];
     for(int i = 0; i < Dividend.size(); i++)
     {
-      DividendArray[i+1] = Dividend[i];
+      DividendArray1[i+1] = Dividend[i];
+      DividendArray2[i+1] = Dividend[i];
     }
     cin >> Divisor;
     for(int i = 0; i < Divisor.size(); i++)
     {
-      DivisorArray[i] = Divisor[i];
+      DivisorArray1[i] = Divisor[i];
+      DivisorArray2[i] = Divisor[i];
     }
     int LengthDenom = Divisor.size();
     int LengthNum = Dividend.size();
@@ -39,20 +45,23 @@ int main()
     if(Dividend[0] == '1') //twos complement Dividend if negative
     {
       CompNum = true;
-      TwosComp(DividendArray, DivisorArray, LengthNum, 1);
+      TwosComp(DividendArray1, DivisorArray1, LengthNum, 1);
+      TwosComp(DividendArray2, DivisorArray2, LengthNum, 1);
+
     }
     if(Divisor[0] == '1') //twos complement Divisor if negative
     {
-      TwosComp(DividendArray, DivisorArray, LengthDenom, 0);
+      TwosComp(DividendArray1, DivisorArray1, LengthDenom, 0);
+      TwosComp(DividendArray2, DivisorArray2, LengthNum, 0);
     }
-    if(DivideOverflow(DividendArray, DivisorArray, LengthDenom, LengthNum)) //check for divide overflow
+    if(DivideOverflow(DividendArray1, DivisorArray1, LengthDenom, LengthNum)) //check for divide overflow
     {
       cout<<"Divide Overflow Occured"<<endl;
     }
     else //perform division
     {
-      Restoring(DividendArray, DivisorArray, LengthDenom, LengthNum, CompNum);
-      NonRestoring(DividendArray, DivisorArray, LengthDenom, LengthNum, CompNum);
+      Restoring(DividendArray1, DivisorArray1, LengthDenom, LengthNum, CompNum);
+      NonRestoring(DividendArray2, DivisorArray2, LengthDenom, LengthNum, CompNum);
     }
   }
   return 0;
