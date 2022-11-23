@@ -8,8 +8,8 @@ void Restoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNum, 
 void NonRestoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNum, bool CompNum);
 bool DivideOverflow(char Dividend[], char Divisor[], int LengthDenom, int LengthNum);
 void TwosComp(char Dividend[], char Divisor[], int Length, int index);
-char Sub(char Dividend[], char Divisor[], int LengthNum, int LengthDenom, int Ebit);
-char Add(char Dividend[], char Divisor[], int LengthNum, int LengthDenom, int Ebit);
+char Sub(char Dividend[], char Divisor[], int LengthNum, int LengthDenom);
+char Add(char Dividend[], char Divisor[], int LengthNum, int LengthDenom, bool Restore);
 
 int main()
 {
@@ -40,14 +40,13 @@ int main()
       DivisorArray2[i] = Divisor[i];
     }
     int LengthDenom = Divisor.size();
-    int LengthNum = Dividend.size();
+    int LengthNum = Dividend.size() + 1;
     CompNum = false;
     if(Dividend[0] == '1') //twos complement Dividend if negative
     {
       CompNum = true;
       TwosComp(DividendArray1, DivisorArray1, LengthNum, 1);
       TwosComp(DividendArray2, DivisorArray2, LengthNum, 1);
-
     }
     if(Divisor[0] == '1') //twos complement Divisor if negative
     {
@@ -77,6 +76,8 @@ void Restoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNum, 
   int n_add = 0;
   int n_iter;
   char ExtraBit;
+  char Remainder[LengthDenom];
+  char Quotient[LengthDenom];
   n_iter = LengthDenom;
   for(int i = 0; i < n_iter; i++)
   {
@@ -88,27 +89,34 @@ void Restoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNum, 
       else
         Dividend[j] = 'E'; //empty bit to be decided
     }
-    ExtraBit = Sub(Dividend, Divisor, LengthNum, LengthDenom, ExtraBit); //subtract
+    ExtraBit = Sub(Dividend, Divisor, LengthNum, LengthDenom); //subtract
     n_sub ++;
     if(ExtraBit == '1') //if the E bit is 1
     {
-      ExtraBit = Add(Dividend, Divisor, LengthNum, LengthDenom, ExtraBit); //restore
+      ExtraBit = Add(Dividend, Divisor, LengthNum, LengthDenom, true); //restore
       n_add +=1;
     }
   }
-  if(CompNum) //twos complement Dividend
-    TwosComp(Dividend, Divisor, LengthNum, 1);
   cout<<"Restoring: "<<endl;
+  for(int i = 0; i < LengthDenom; i++) //get Remainder
+    Remainder[i] = Dividend[i];
+  for(int i = 0; i < LengthDenom; i++) //get Quotient
+    Quotient[i] = Dividend[i+LengthDenom];
+  if(CompNum == true) //if the dividend was 2's complemented
+  {
+    TwosComp(Remainder, Divisor, LengthDenom, 1);
+    TwosComp(Quotient, Divisor, LengthDenom, 1);
+  }
   cout<<"Remainder: ";
   for(int i = 0; i < LengthDenom; i++) //print Remainder (the first half of the result)
   {
-    cout<<Dividend[i];
+    cout<<Remainder[i];
   }
   cout<<endl;
   cout<<"Quotient: ";
-  for(int i = 0; i < LengthDenom; i++) //print Quotient (the second half of the result)
+    for(int i = 0; i < LengthDenom; i++) //print Quotient (the second half of the result)
   {
-    cout<<Dividend[i+LengthDenom];
+    cout<<Quotient[i];
   }
   cout<<endl;
   cout<<"Num Additions: "<<n_add<<endl;
@@ -126,6 +134,8 @@ void NonRestoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNu
   int n_add = 0;
   int n_iter;
   char ExtraBit;
+  char Remainder[LengthDenom];
+  char Quotient[LengthDenom];
   n_iter = LengthDenom;
   for(int i = 0; i < n_iter; i++)
   {
@@ -139,28 +149,35 @@ void NonRestoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNu
     }
     if((i == 0)  || (ExtraBit == '0')) //if the first time through or the E bit is 0
     {
-      ExtraBit = Sub(Dividend, Divisor, LengthNum, LengthDenom, ExtraBit);
+      ExtraBit = Sub(Dividend, Divisor, LengthNum, LengthDenom);
       n_sub++;
     }
     else if(ExtraBit == '1') //if the E bit is 1
     {
-      ExtraBit = Add(Dividend, Divisor, LengthNum, LengthDenom, ExtraBit);
+      ExtraBit = Add(Dividend, Divisor, LengthNum, LengthDenom, false);
       n_add++;
     }
   }
-  if(CompNum) //twos complement dividend
-    TwosComp(Dividend, Divisor, LengthNum, 1);
   cout<<"NonRestoring: "<<endl;
-  cout<<"Remainder: ";
-  for(int i = 0; i < LengthDenom; i++) //print out remainder
+  for(int i = 0; i < LengthDenom; i++) //get Remainder
+    Remainder[i] = Dividend[i];
+  for(int i = 0; i < LengthDenom; i++) //get Quotient
+    Quotient[i] = Dividend[i+LengthDenom];
+  if(CompNum == true) //if the dividend was 2's complemented
   {
-    cout<<Dividend[i];
+    TwosComp(Remainder, Divisor, LengthDenom, 1);
+    TwosComp(Quotient, Divisor, LengthDenom, 1);
+  }
+  cout<<"Remainder: ";
+  for(int i = 0; i < LengthDenom; i++) //print Remainder (the first half of the result)
+  {
+    cout<<Remainder[i];
   }
   cout<<endl;
   cout<<"Quotient: ";
-  for(int i = 0; i < LengthDenom; i++) //print out quotient
+    for(int i = 0; i < LengthDenom; i++) //print Quotient (the second half of the result)
   {
-    cout<<Dividend[i+LengthDenom];
+    cout<<Quotient[i];
   }
   cout<<endl;
   cout<<"Num Additions: "<<n_add<<endl;
@@ -201,20 +218,25 @@ void TwosComp(char Dividend[], char Divisor[], int Length, int index)
     for(int i = 0; i < Length; i++) // Going across the number from left to right complementing the bits
     {
       if(Dividend[i] == '0')
-        Dividend[i] == '1';
+        Dividend[i] = '1';
       else
-       Dividend[i] == '0';
+       Dividend[i] = '0';
     }
     if(Dividend[Length-1] == '0') // If the LSB is 0 adding 1 just makes it 1.
-      Dividend[Length-1] == '1';
+    {
+      Dividend[Length-1] = '1';
+    }
     else
     {
       for(int i = Length-1; i > 0; i--) // Going across the number from right to left dealing with the addition of 1.
       {
         if(Dividend[i] == '1')
-          Dividend[i] == '0';
+          Dividend[i] = '0';
         else
-          Dividend[i] == '1';
+        {
+          Dividend[i] = '1';
+          i = 0;
+        }
       }
     }
   }
@@ -223,20 +245,20 @@ void TwosComp(char Dividend[], char Divisor[], int Length, int index)
     for(int i = 0; i < Length; i++) // Going across the number from left to right complementing the bits
     {
       if(Divisor[i] == '0')
-        Divisor[i] == '1';
+        Divisor[i] = '1';
       else
-        Divisor[i] == '0';
+        Divisor[i] = '0';
     }
     if(Divisor[Length-1] == '0') // If the LSB is 0 adding 1 just makes it 1.
-      Divisor[Length-1] == '1';
+      Divisor[Length-1] = '1';
     else
     {
       for(int i = Length-1; i > 0; i--) // Going across the number from right to left dealing with the addition of 1.
       {
         if(Divisor[i] == '1')
-          Divisor[i] == '0';
+          Divisor[i] = '0';
         else
-          Divisor[i] == '1';
+          Divisor[i] = '1';
       }
     }
   }
@@ -245,12 +267,13 @@ void TwosComp(char Dividend[], char Divisor[], int Length, int index)
 
 //Description: Performs Subtraction on the Dividend and Divisor
 //Pre: Dividend. Divisor. and their lengths must be defined
-//Post: returns the extra bit adn updates the dividend
-char Sub(char Dividend[], char Divisor[], int LengthNum, int LengthDenom, int Ebit)
+//Post: returns the extra bit and updates the dividend
+char Sub(char Dividend[], char Divisor[], int LengthNum, int LengthDenom)
 {
   bool carry = false;
   char extra;
   TwosComp(Dividend, Divisor, LengthDenom, 0); //twos complement divisor
+  char DivisorExtra = 1;
   for(int i = LengthDenom-1; i >= 0; i--)
   {
     if((Divisor[i] == '1') && (Dividend[i] == '1')) //if 1+1
@@ -287,29 +310,13 @@ char Sub(char Dividend[], char Divisor[], int LengthNum, int LengthDenom, int Eb
   }
   if(carry) //if carry bit is 1
   {
-    if(Ebit == 1) //if E bit was 1 before carry
-    {
-      Dividend[LengthNum-1] = '1';
-      extra = '0';
-    }
-    else //if E bit was 0 before carry
-    {
-      Dividend[LengthNum-1] = '0';
-      extra = '1';
-    }
+    extra = '0';
+    Dividend[LengthNum-1] = '1';
   }
   else //if carry bit is 0
   {
-    if(Ebit == 1) //if E bit was 1 before
-    {
-      Dividend[LengthNum-1] = '0';
-      extra = '1';
-    }
-    else //if E bit was 0 before
-    {
-      Dividend[LengthNum-1] = '1';
-      extra = '0';
-    }
+    extra = '1';
+    Dividend[LengthNum-1] = '0';
   }
   TwosComp(Dividend, Divisor, LengthDenom, 0); //twos complement divisor, bring it back to original
   return extra;
@@ -318,7 +325,7 @@ char Sub(char Dividend[], char Divisor[], int LengthNum, int LengthDenom, int Eb
 //Description: Performs Addition on the Dividend and Divisor
 //Pre: Dividend, Divisor, and their lengths must be defined
 //Post: return updated dividend and extra bit
-char Add(char Dividend[], char Divisor[], int LengthNum, int LengthDenom, int Ebit)
+char Add(char Dividend[], char Divisor[], int LengthNum, int LengthDenom, bool Restore)
 {
   bool carry = false;
   char extra;
@@ -358,29 +365,15 @@ char Add(char Dividend[], char Divisor[], int LengthNum, int LengthDenom, int Eb
   }
   if(carry) //if carry bit is 1
   {
-    if(Ebit == 1) //if E bit was 1 before carry
-    {
+    extra = '0';
+    if(!Restore)
       Dividend[LengthNum-1] = '1';
-      extra = '0';
-    }
-    else //if E bit was 0 before carry
-    {
-      Dividend[LengthNum-1] = '0';
-      extra = '1';
-    }
   }
   else //if carry bit is 0
   {
-    if(Ebit == 1) //if E bit was 1 before
-    {
+    extra = '1';
+    if(!Restore)
       Dividend[LengthNum-1] = '0';
-      extra = '1';
-    }
-    else //if E bit was 0 before
-    {
-      Dividend[LengthNum-1] = '1';
-      extra = '0';
-    }
   }
   return extra;
 }
