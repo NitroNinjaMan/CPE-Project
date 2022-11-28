@@ -4,8 +4,8 @@
 #include <iostream>
 using namespace std;
 
-void Restoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNum, bool CompNum);
-void NonRestoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNum, bool CompNum);
+void Restoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNum, bool CompNum, bool CompDenom);
+void NonRestoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNum, bool CompNum, bool CompDenom);
 bool DivideOverflow(char Dividend[], char Divisor[], int LengthDenom, int LengthNum);
 void TwosComp(char Dividend[], char Divisor[], int Length, int index);
 char Sub(char Dividend[], char Divisor[], int LengthNum, int LengthDenom);
@@ -13,7 +13,7 @@ char Add(char Dividend[], char Divisor[], int LengthNum, int LengthDenom, bool R
 
 int main()
 {
-  bool CompNum;
+  bool CompNum, CompDenom;
   const int MAXNUM = 25;
   const int MAXDENOM = 13;
   string Dividend;
@@ -23,7 +23,7 @@ int main()
   char DividendArray2[MAXNUM];
   char DivisorArray2[MAXDENOM];
 
-  for(int i = 0; i < 20; i++)
+  for(int i = 0; i < 1; i++)
   {
     cin >> Dividend;
     DividendArray1[0] = Dividend[0];
@@ -42,6 +42,7 @@ int main()
     int LengthDenom = Divisor.size();
     int LengthNum = Dividend.size() + 1;
     CompNum = false;
+    CompDenom = false;
     if(Dividend[0] == '1') //twos complement Dividend if negative
     {
       CompNum = true;
@@ -50,8 +51,9 @@ int main()
     }
     if(Divisor[0] == '1') //twos complement Divisor if negative
     {
+      CompDenom = true;
       TwosComp(DividendArray1, DivisorArray1, LengthDenom, 0);
-      TwosComp(DividendArray2, DivisorArray2, LengthNum, 0);
+      TwosComp(DividendArray2, DivisorArray2, LengthDenom, 0);
     }
     if(DivideOverflow(DividendArray1, DivisorArray1, LengthDenom, LengthNum)) //check for divide overflow
     {
@@ -59,8 +61,8 @@ int main()
     }
     else //perform division
     {
-      Restoring(DividendArray1, DivisorArray1, LengthDenom, LengthNum, CompNum);
-      NonRestoring(DividendArray2, DivisorArray2, LengthDenom, LengthNum, CompNum);
+      Restoring(DividendArray1, DivisorArray1, LengthDenom, LengthNum, CompNum, CompDenom);
+      NonRestoring(DividendArray2, DivisorArray2, LengthDenom, LengthNum, CompNum, CompDenom);
     }
   }
   return 0;
@@ -70,7 +72,7 @@ int main()
 //Description: Performs the restoring division method
 //Pre: Dividend, Divisor, and their lengths have been defined.
 //Post: Prints out the Quotient, Remainder, and the number of additions, subtractions, and iterations.
-void Restoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNum, bool CompNum)
+void Restoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNum, bool CompNum, bool CompDenom)
 {
   int n_sub = 0;
   int n_add = 0;
@@ -102,9 +104,13 @@ void Restoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNum, 
     Remainder[i] = Dividend[i];
   for(int i = 0; i < LengthDenom; i++) //get Quotient
     Quotient[i] = Dividend[i+LengthDenom];
-  if(CompNum == true) //if the dividend was 2's complemented
+  if((CompNum == true) && (CompDenom == false)) //if the dividend was negative only
   {
     TwosComp(Remainder, Divisor, LengthDenom, 1);
+    TwosComp(Quotient, Divisor, LengthDenom, 1);
+  }
+  else if((CompNum == false) && (CompDenom == true)) //if the divisor was negative only
+  {
     TwosComp(Quotient, Divisor, LengthDenom, 1);
   }
   cout<<"Remainder: ";
@@ -128,7 +134,7 @@ void Restoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNum, 
 //Description: Performs the nonrestoring division method
 //Pre: Dividend, Divisor, and their lengths have been defined.
 //Post: Prints out the Quotient, Remainder, and the number of additions, subtractions, and iterations.
-void NonRestoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNum, bool CompNum)
+void NonRestoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNum, bool CompNum, bool CompDenom)
 {
   int n_sub = 0;
   int n_add = 0;
@@ -139,7 +145,7 @@ void NonRestoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNu
   n_iter = LengthDenom;
   for(int i = 0; i < n_iter; i++)
   {
-    ExtraBit = Dividend[0]; //the extra bit = the frist dividend bit
+    ExtraBit = Dividend[0]; //the extra bit = the first dividend bit
     for(int j = 0; j < LengthNum; j++) //shift left
     {
       if(j != LengthNum-1)
@@ -147,25 +153,31 @@ void NonRestoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNu
       else
         Dividend[j] = 'E'; //empty bit to be decided
     }
-    if((i == 0)  || (ExtraBit == '0')) //if the first time through or the E bit is 0
+    if((i == 0) || (ExtraBit == '0')) //if the first time through or the E bit is 0
     {
       ExtraBit = Sub(Dividend, Divisor, LengthNum, LengthDenom);
       n_sub++;
     }
-    else if(ExtraBit == '1') //if the E bit is 1
+    else //if the E bit is 1
     {
       ExtraBit = Add(Dividend, Divisor, LengthNum, LengthDenom, false);
       n_add++;
     }
   }
+  if(ExtraBit == '1') //if E bit is 1 at end
+    ExtraBit = Add(Dividend,Divisor,LengthNum,LengthDenom, true);
   cout<<"NonRestoring: "<<endl;
   for(int i = 0; i < LengthDenom; i++) //get Remainder
     Remainder[i] = Dividend[i];
   for(int i = 0; i < LengthDenom; i++) //get Quotient
     Quotient[i] = Dividend[i+LengthDenom];
-  if(CompNum == true) //if the dividend was 2's complemented
+  if((CompNum == true) && (CompDenom == false)) //if the dividend was negative only
   {
     TwosComp(Remainder, Divisor, LengthDenom, 1);
+    TwosComp(Quotient, Divisor, LengthDenom, 1);
+  }
+  else if((CompNum == false) && (CompDenom == true)) //if the divisor was negative only
+  {
     TwosComp(Quotient, Divisor, LengthDenom, 1);
   }
   cout<<"Remainder: ";
