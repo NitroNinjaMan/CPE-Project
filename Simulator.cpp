@@ -204,14 +204,14 @@ void NonRestoring(char Dividend[], char Divisor[], int LengthDenom, int LengthNu
 bool DivideOverflow(char Dividend[], char Divisor[], int LengthDenom, int LengthNum)
 {
   bool Overflow = false;
-  for(int i = 1; i < LengthDenom; i++)
+  for(int i = 0; i < LengthDenom; i++)
   {
-    if((Dividend[i] == 1) && (Divisor[i] == 0)) //if bit of Dividend = 1 and bit of Divisor = 0.
+    if((Dividend[i] == '1') && (Divisor[i] == '0')) //if bit of Dividend = 1 and bit of Divisor = 0.
     {
       Overflow = true;
       i = LengthDenom;
     }
-    else if((Dividend[i] == 0) && (Divisor[i] == 1)) //if bit of Dividend = 0 and bit of Divisor = 1.
+    else if((Dividend[i] == '0') && (Divisor[i] == '1')) //if bit of Dividend = 0 and bit of Divisor = 1.
     {
       Overflow = false;
       i = LengthDenom;
